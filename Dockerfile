@@ -82,6 +82,6 @@ RUN rm -r /usr/src/postgres \
 RUN pip3 install requests
 
 # CONFIG
-COPY *.sql /docker-entrypoint-initdb.d/
+#COPY *.sql /docker-entrypoint-initdb.d/
 COPY *.sh /docker-entrypoint-initdb.d/
 RUN chmod a+r /docker-entrypoint-initdb.d/*
