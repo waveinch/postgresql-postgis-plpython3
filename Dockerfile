@@ -67,6 +67,12 @@ RUN cd /usr/src/postgres/contrib \
     && make USE_PGXS=1  \
     && make USE_PGXS=1 install
 
+RUN cd /usr/src/postgres/contrib \
+    && git clone https://github.com/vibhorkum/pg_background.git \
+    && cd pg_background \
+    && make \
+    && make install
+
 # CLEANUP
 RUN rm -r /usr/src/postgres \
     && apt --yes remove --purge  \
