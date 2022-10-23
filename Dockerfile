@@ -58,14 +58,14 @@ RUN cd /usr/src/ \
     && git checkout $PG_BRANCH \
     && ./configure
 
-# DEBUGGER SOURCE
-RUN cd /usr/src/postgres/contrib \
-    && git clone https://github.com/ng-galien/pldebugger.git \
-    && cd pldebugger \
-    && git checkout $PLUGIN_BRANCH \
-    && make clean  \
-    && make USE_PGXS=1  \
-    && make USE_PGXS=1 install
+# # DEBUGGER SOURCE
+# RUN cd /usr/src/postgres/contrib \
+#     && git clone https://github.com/ng-galien/pldebugger.git \
+#     && cd pldebugger \
+#     && git checkout $PLUGIN_BRANCH \
+#     && make clean  \
+#     && make USE_PGXS=1  \
+#     && make USE_PGXS=1 install
 
 RUN cd /usr/src/postgres/contrib \
     && git clone https://github.com/vibhorkum/pg_background.git \
