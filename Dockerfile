@@ -1,7 +1,7 @@
 FROM postgres:13
 
 ENV POSTGIS_MAJOR 3
-ENV POSTGIS_VERSION 3.2.1+dfsg-1.pgdg110+1
+ENV POSTGIS_VERSION 3.3.1+dfsg-1.pgdg110+1
 
 MAINTAINER Andrea Minetti (andrea@wavein.ch)
 
