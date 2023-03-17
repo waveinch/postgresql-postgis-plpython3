@@ -39,6 +39,7 @@ RUN apt-get update \
            git python3 \
            python3-pip \
            postgresql-plpython3-$PG_MAJOR \
+           postgresql-$PG_MAJOR-wal2json \
            postgresql-$PG_MAJOR-postgis-$POSTGIS_MAJOR \
            postgresql-$PG_MAJOR-postgis-$POSTGIS_MAJOR-scripts \
            build-essential  \
@@ -57,7 +58,14 @@ RUN cd /usr/src/ \
     && git checkout $PG_BRANCH \
     && ./configure
 
-
+# # DEBUGGER SOURCE
+RUN cd /usr/src/postgres/contrib \
+    && git clone https://github.com/ng-galien/pldebugger.git \
+    && cd pldebugger \
+    && git checkout print-vars \
+    && make clean  \
+    && make USE_PGXS=1  \
+    && make USE_PGXS=1 install
 
 RUN cd /usr/src/postgres/contrib \
     && git clone https://github.com/vibhorkum/pg_background.git \
@@ -79,3 +87,7 @@ RUN rm -r /usr/src/postgres \
 # Python modules
 RUN pip3 install requests
 
+# CONFIG
+#COPY *.sql /docker-entrypoint-initdb.d/
+COPY *.sh /docker-entrypoint-initdb.d/
+RUN chmod a+r /docker-entrypoint-initdb.d/*
