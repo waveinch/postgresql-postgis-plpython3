@@ -1,8 +1,8 @@
-FROM postgres:15-bullseye
+FROM postgres:16-bullseye
 
 ENV POSTGIS_MAJOR 3
 
-MAINTAINER Andrea Minetti (andrea@wavein.ch)
+MAINTAINER Andrea Minetti (andrea.minetti@wsl.ch)
 
 # ENV PLV8_VERSION=3.0.0
 
@@ -44,6 +44,11 @@ RUN apt-get update \
            build-essential  \
            libreadline-dev  \
            zlib1g-dev  \
+           icu-devtools \
+           libicu-dev \
+           pkg-config \
+           clang-13 \
+           llvm-13 \
            bison  \
            libkrb5-dev  \
            flex  \
@@ -79,3 +84,63 @@ RUN rm -r /usr/src/postgres \
 # Python modules
 RUN pip3 install requests
 
+
+
+# Oracle FDW
+
+# Latest version
+ARG ORACLE_CLIENT_URL=https://download.oracle.com/otn_software/linux/instantclient/instantclient-basiclite-linuxx64.zip
+#ARG ORACLE_SQLPLUS_URL=https://download.oracle.com/otn_software/linux/instantclient/instantclient-sqlplus-linuxx64.zip
+ARG ORACLE_SDK_URL=https://download.oracle.com/otn_software/linux/instantclient/instantclient-sdk-linuxx64.zip
+
+# Version specific setup
+#ARG ORACLE_CLIENT_VERSION=18.5.0.0.0
+#ARG ORACLE_CLIENT_PATH=185000
+#ARG ORACLE_CLIENT_VERSION=19.8.0.0.0
+#ARG ORACLE_CLIENT_PATH=19800
+#ARG ORACLE_CLIENT_URL=https://download.oracle.com/otn_software/linux/instantclient/${ORACLE_CLIENT_PATH}/instantclient-basic-linux.x64-${ORACLE_CLIENT_VERSION}dbru.zip
+#ARG ORACLE_SQLPLUS_URL=https://download.oracle.com/otn_software/linux/instantclient/${ORACLE_CLIENT_PATH}/instantclient-sqlplus-linux.x64-${ORACLE_CLIENT_VERSION}dbru.zip
+#ARG ORACLE_SDK_URL=https://download.oracle.com/otn_software/linux/instantclient/${ORACLE_CLIENT_PATH}/instantclient-sdk-linux.x64-${ORACLE_CLIENT_VERSION}dbru.zip
+
+ENV ORACLE_HOME=/usr/lib/oracle/client
+
+RUN apt-get update; \
+    apt-get install -y --no-install-recommends ca-certificates wget unzip; \
+    # instant client
+    wget -O instant_client.zip ${ORACLE_CLIENT_URL}; \
+    unzip instant_client.zip; \
+    # sqlplus
+    #wget -O sqlplus.zip ${ORACLE_SQLPLUS_URL}; \
+    #unzip sqlplus.zip; \
+    # sdk
+    wget -O sdk.zip ${ORACLE_SDK_URL}; \
+    unzip sdk.zip; \
+    # install
+    mkdir -p ${ORACLE_HOME}; \
+    mv instantclient*/* ${ORACLE_HOME}; \
+    rm -r instantclient*; \
+    rm instant_client.zip sdk.zip; \
+    #rm instant_client.zip sqlplus.zip sdk.zip; \
+    # required runtime libs: libaio
+    apt-get install -y --no-install-recommends libaio1; \
+    apt-get purge -y --auto-remove
+
+ENV PATH $PATH:${ORACLE_HOME}
+
+
+ARG ORACLE_FDW_VERSION=2_6_0
+ARG ORACLE_FDW_URL=https://github.com/laurenz/oracle_fdw/archive/ORACLE_FDW_${ORACLE_FDW_VERSION}.tar.gz
+ARG SOURCE_FILES=tmp/oracle_fdw
+
+    # oracle_fdw
+RUN mkdir -p ${SOURCE_FILES}; \
+    wget -O - ${ORACLE_FDW_URL} | tar -zx --strip-components=1 -C ${SOURCE_FILES}; \
+    cd ${SOURCE_FILES}; \
+    # install
+    apt-get install -y --no-install-recommends make gcc; \
+    make; \
+    make install; \
+    echo ${ORACLE_HOME} > /etc/ld.so.conf.d/oracle_instantclient.conf; \
+    ldconfig; \
+    # cleanup
+    apt-get purge -y --auto-remove gcc make
