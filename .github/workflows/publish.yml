@@ -1,0 +1,20 @@
+name: Publish
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  push:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v1      
+      - uses: docker/build-push-action@v1
+        with:
+          username: minettiandrea
+          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
+          repository: minettiandrea/postgresql-extended
+          tag_with_ref: true
