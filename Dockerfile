@@ -144,3 +144,5 @@ RUN mkdir -p ${SOURCE_FILES}; \
     ldconfig; \
     # cleanup
     apt-get purge -y --auto-remove gcc make
+
+RUN wget https://cdn.proj.org/ch_swisstopo_CHENyx06a.tif -P /usr/share/proj
